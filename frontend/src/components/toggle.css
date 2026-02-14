@@ -1,0 +1,24 @@
+.toggle-container {
+  position: absolute;
+  top: 2rem;
+  right: 2rem;
+  display: flex;
+  align-items: center;
+  z-index: 1000;
+}
+
+.toggle {
+    visibility: hidden;
+}
+
+.toggle-container i {
+  font-size: 24px;
+  color: var(--primary-text-color); 
+  cursor: pointer;
+  transition: color 0.3s ease;
+  display: inline-block;
+}
+
+body.dark-theme .toggle-container i {
+    color: var(--primary-text-color);
+}
