@@ -1,0 +1,1 @@
+🗂️ A full-stack task management web application that allows users to securely sign up, log in, and organize their daily tasks through an intuitive dashboard. Built with React, Vite, and a backend API connected to a MySQL database.
