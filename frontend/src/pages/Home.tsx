@@ -1,26 +1,6 @@
-import { useEffect } from "react";
 import "./Home.css";
 
 function Home() {
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollY = window.scrollY;
-
-      const boxes = document.querySelectorAll<HTMLDivElement>(".box div");
-
-      boxes.forEach((el, i) => {
-        const speed = 0.2 + i * 0.05;
-
-        el.style.transform = `translateY(${scrollY * speed}px)`;
-      });
-    };
-
-    window.addEventListener("scroll", handleScroll);
-
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
   return (
     <>
       <div className="wrapper">
