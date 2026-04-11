@@ -1,74 +1,78 @@
 nav {
-    display: flex;
-    max-width: 100%;
-    font-size: var(--font-size-small);
-    padding: var(--nav-padding);
-    align-items: center;
-    justify-content: center;
-    gap: var(--offset); 
-    background-color: var(--primary-background-color);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  display: flex;
+  max-width: 100%;
+  font-size: var(--font-size-small);
+  padding: 1.2rem;
+  align-items: center;
+  justify-content: center;  
+  gap: var(--offset); 
+  background: var(--primary-background-color);
 }
 
 .nav-links {
-    display: flex;
-    list-style: none;
-    justify-content: center; 
-    align-items: center;   
-    gap: var(--nav-links-gap);        
-    margin: 0;              
-    padding: 0;            
+  display: flex;
+  list-style: none;
+  justify-content: center; 
+  align-items: center;   
+  gap: var(--nav-links-gap);        
+  margin: 0;              
+  padding: 0;            
 }
 
 .link a{
-    text-decoration: none;
-    position: relative;
-    color: var(--primary-text-color);
+  text-decoration: none;
+  position: relative;
+  color: var(--primary-text-color);
 }
 
 .link a:not(.login-btn):not(.signup-btn)::after {
-    content: "";
-    position: absolute;
-    height: 2px;
-    width: 0;
-    bottom: 0;
-    left: 0;
-    background-color: var(--accent-color);
-    transition: all 0.3s ease;
+  content: "";
+  position: absolute;
+  height: 2px;
+  width: 0;
+  bottom: 0;
+  left: 0;
+  background-color: var(--accent-color);
+  transition: all 0.3s ease;
 }
 
 .link a:not(.login-btn):not(.signup-btn):hover::after {
-    width: 70%;
+  width: 70%;
 }
 
-.login-btn {
-    border: 2px solid var(--primary-text-color);
-    padding: 6px 12px;
-    border-radius: var(--border-radius);
+.login-btn, .signup-btn {
+  border: 2px solid var(--primary-text-color);
+  padding: 4px 10px;
+  border-radius: var(--border-radius);
 }
 
-.login-btn:hover {
-    background-color: var(--primary-text-color);
-    color: var(--primary-text-color);
+.login-btn:hover, .signup-btn:hover {
+  background-color: var(--primary-text-color);
+  color: var(--primary-background-color);
+  transition: all 0.2s ease;
 }
 
 @media (max-width: 768px) {
   nav {
-    flex-wrap: wrap;             /* allow items to wrap on smaller screens */
-    justify-content: center;      /* keep content centered */
+    flex-wrap: wrap;           
+    justify-content: center;     
   }
 
   .nav-links {
-    flex-direction: column;       /* stack links vertically */
-    gap: 0.75rem;                 /* slightly smaller spacing */
-    width: 100%;                  /* fill available width */
-    align-items: center;          /* center links */
+    flex-direction: column;     
+    gap: 0.75rem;              
+    width: 100%;                 
+    align-items: center;         
   }
 
   .link a {
-    font-size: 1rem;              /* slightly smaller font for mobile */
+    font-size: 1rem;              
   }
 
   .login-btn {
-    width: auto;                  /* keep button natural width */
+    width: auto;                 
   }
 }
