@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
+import Sidebar from "./components/SideBar";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import Dashboard from "./pages/Dashboard";
@@ -11,9 +12,11 @@ import "./App.css";
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isDark, setIsDark] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const handleLogout = () => {
     setIsAuthenticated(false);
+    localStorage.removeItem("token");
   };
 
   return (
@@ -23,12 +26,18 @@ function App() {
           isAuthenticated={isAuthenticated} 
           onLogout={handleLogout} 
           isDark={isDark} 
-          toggleDark={() => setIsDark(!isDark)} 
+          toggleDark={() => setIsDark(!isDark)}
+          onOpenSidebar={() => setIsSidebarOpen(prev => !prev)}
+        />
+        <Sidebar
+          isOpen={isSidebarOpen}
+          isAuthenticated={isAuthenticated}
+          onClose={() => setIsSidebarOpen(false)}
+          onLogout={handleLogout}
         />
 
         <Routes>
           <Route path="/" element={<Home />} />
-          {/* Dashboard redirect to home temporarily */}
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/calendar" element={<CalendarView />} />
           <Route path="/signin" element={<SignIn setIsAuthenticated={setIsAuthenticated} />} />

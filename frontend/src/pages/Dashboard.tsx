@@ -8,14 +8,13 @@ function Dashboard() {
   const [description, setDescription] = useState("");
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
+  const [isAllDay, setIsAllDay] = useState(false);
 
   const formatDateTime = (value: string) => {
     return value.replace("T", " ") + ":00";
   };
 
-  const handleCreateEvent = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const handleCreateEvent = async (allDay: boolean) => {
     const userId = localStorage.getItem("userId");
 
     if (!userId) {
@@ -23,7 +22,7 @@ function Dashboard() {
       return;
     }
 
-    if (!title || !startTime || !endTime) {
+    if (!title) {
       alert("Please fill all required fields");
       return;
     }
@@ -31,18 +30,35 @@ function Dashboard() {
     setLoading(true);
 
     try {
+      let payload: any = {
+        name: title,
+        description,
+        userId,
+        isAllDay: allDay,
+      };
+
+      if (allDay) {
+        const dateOnly = startTime.split("T")[0];
+
+        payload.startTime = dateOnly + " 00:00:00";
+        payload.endTime = dateOnly + " 23:59:59";
+      } else {
+        if (!startTime || !endTime) {
+          alert("Please fill all required fields");
+          setLoading(false);
+          return;
+        }
+
+        payload.startTime = formatDateTime(startTime);
+        payload.endTime = formatDateTime(endTime);
+      }
+
       await fetch("/api/tasks", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          name: title,
-          description,
-          startTime: formatDateTime(startTime),
-          endTime: formatDateTime(endTime),
-          userId,
-        }),
+        body: JSON.stringify(payload),
       });
 
       alert("Event created! Go to calendar to see it.");
@@ -63,7 +79,7 @@ function Dashboard() {
     <div className="dashboard-container">
       <h1 className="dashboard-title">Create Event</h1>
 
-      <form className="event-form" onSubmit={handleCreateEvent}>
+      <form className="event-form">
         <input
           className="input"
           type="text"
@@ -95,9 +111,25 @@ function Dashboard() {
           onChange={(e) => setEndTime(e.target.value)}
         />
 
-        <button className="create-event-btn" type="submit" disabled={loading}>
-          {loading ? "Creating..." : "Create Event"}
-        </button>
+        <div style={{ display: "flex", gap: "10px" }}>
+          <button
+            className="create-event-btn"
+            type="button"
+            disabled={loading}
+            onClick={() => handleCreateEvent(false)}
+          >
+            {loading ? "Creating..." : "Timed Event"}
+          </button>
+
+          <button
+            className="create-event-btn"
+            type="button"
+            disabled={loading}
+            onClick={() => handleCreateEvent(true)}
+          >
+            {loading ? "Creating..." : "All Day Event"}
+          </button>
+        </div>
       </form>
     </div>
   );

@@ -34,8 +34,7 @@ const SignIn = ({ setIsAuthenticated }: SignInProps) => {
 
       if (!res.ok) throw new Error(data.error);
 
-      localStorage.setItem("userId", data.user.id);
-      localStorage.setItem("username", data.user.username);
+      localStorage.setItem("token", data.token);
 
       setIsAuthenticated(true);
     } catch (err) {

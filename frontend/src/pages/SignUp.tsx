@@ -12,6 +12,7 @@ const SignUp = ({ setIsAuthenticated }: SignUpProps) => {
     email: "",
     password: "",
   });
+
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -33,12 +34,12 @@ const SignUp = ({ setIsAuthenticated }: SignUpProps) => {
 
       const data = await res.json();
 
-      if (!res.ok) throw new Error(data.error);
-
-      localStorage.setItem("userId", data.user.id);
-      localStorage.setItem("username", data.user.username);
+      if (!res.ok) {
+        throw new Error(data.error || "Signup failed");
+      }
 
       setIsAuthenticated(true);
+      
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
@@ -54,6 +55,7 @@ const SignUp = ({ setIsAuthenticated }: SignUpProps) => {
     <div className="signup-container">
       <form onSubmit={handleSubmit} className="signup-form">
         <h2>Sign Up</h2>
+
         {error && <p className="error-message">{error}</p>}
 
         <input

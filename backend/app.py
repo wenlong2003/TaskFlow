@@ -2,9 +2,15 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import mysql.connector
 from werkzeug.security import generate_password_hash, check_password_hash
+import jwt
+import datetime
+from functools import wraps
 
 app = Flask(__name__)
-CORS(app)  
+CORS(app)
+
+# CONFIG
+SECRET_KEY = "super_secret_key_change_this"
 
 # Database connection
 def get_db_connection():
@@ -15,20 +21,42 @@ def get_db_connection():
         database="task_db"
     )
 
-# Test route
+# JWT MIDDLEWARE
+def token_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = None
+
+        if "Authorization" in request.headers:
+            token = request.headers["Authorization"].split(" ")[1]
+
+        if not token:
+            return jsonify({"error": "Token missing"}), 401
+
+        try:
+            decoded = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+            request.user_id = decoded["user_id"]
+        except:
+            return jsonify({"error": "Invalid token"}), 401
+
+        return f(*args, **kwargs)
+
+    return decorated
+
+# TEST ROUTE
 @app.route("/api/test", methods=["GET"])
 def test():
     return jsonify({"message": "Server is running"}), 200
 
-# GET all tasks for DEBUGGING
+
+# GET TASKS (PROTECTED)
 @app.route("/api/tasks", methods=["GET"])
+@token_required
 def get_tasks():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
 
-    user_id = request.args.get("userId")
-    if not user_id:
-        return jsonify({"error": "userId is required"}), 400
+    user_id = request.user_id
     cursor.execute("SELECT * FROM Tasks WHERE userId = %s", (user_id,))
     tasks = cursor.fetchall()
 
@@ -37,12 +65,14 @@ def get_tasks():
 
     return jsonify(tasks)
 
-# INSERT task
+
+# CREATE TASK (PROTECTED)
 @app.route("/api/tasks", methods=["POST"])
+@token_required
 def insert_task():
     data = request.get_json()
 
-    required_fields = ["name", "startTime", "endTime", "userId"]
+    required_fields = ["name", "startTime", "endTime"]
 
     if not data or any(field not in data for field in required_fields):
         return jsonify({"error": "Missing required fields"}), 400
@@ -51,13 +81,18 @@ def insert_task():
     startTime = data.get("startTime")
     endTime = data.get("endTime")
     description = data.get("description", "")
-    userId = data.get("userId")
+    isAllDay = data.get("isAllDay", False)
+    userId = request.user_id
 
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    sql = "INSERT INTO Tasks (name, description, startTime, endTime, userId) VALUES (%s, %s, %s, %s, %s)"
-    cursor.execute(sql, (name, description, startTime, endTime, userId))
+    sql = """
+        INSERT INTO Tasks (name, description, startTime, endTime, isAllDay, userId)
+        VALUES (%s, %s, %s, %s, %s, %s)
+    """
+
+    cursor.execute(sql, (name, description, startTime, endTime, isAllDay, userId))
     conn.commit()
 
     cursor.close()
@@ -65,90 +100,116 @@ def insert_task():
 
     return jsonify({"message": "Task inserted"}), 201
 
-# Register route
+
+# REGISTER
 @app.route("/api/register", methods=["POST"])
 def register():
     data = request.get_json()
-    
-    # Check required fields
+
     if not data or not data.get("username") or not data.get("email") or not data.get("password"):
         return jsonify({"error": "Username, email and password are required"}), 400
-    
+
     username = data["username"]
     email = data["email"]
     password = data["password"]
-    
+
     try:
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
-        
-        # Check if user exists
-        cursor.execute("SELECT * FROM users WHERE username = %s OR email = %s", (username, email))
+
+        cursor.execute(
+            "SELECT * FROM Users WHERE username = %s OR email = %s",
+            (username, email)
+        )
+
         if cursor.fetchone():
             cursor.close()
             conn.close()
             return jsonify({"error": "User already exists"}), 409
-        
-        # Create new user
+
         hashed_password = generate_password_hash(password)
+
         cursor.execute(
-            "INSERT INTO users (username, email, password) VALUES (%s, %s, %s)",
+            "INSERT INTO Users (username, email, password) VALUES (%s, %s, %s)",
             (username, email, hashed_password)
         )
+
         conn.commit()
-        
-        # Get created user
+
         user_id = cursor.lastrowid
-        cursor.execute("SELECT id, username, email, createdAt FROM users WHERE id = %s", (user_id,))
+
+        cursor.execute(
+            "SELECT id, username, email, createdAt FROM Users WHERE id = %s",
+            (user_id,)
+        )
+
         new_user = cursor.fetchone()
-        
+
         cursor.close()
         conn.close()
-        
+
         return jsonify({
             "message": "Registration successful",
             "user": new_user
         }), 201
-        
+
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# Login route
+
+# LOGIN (JWT GENERATED HERE)
 @app.route("/api/login", methods=["POST"])
 def login():
     data = request.get_json()
-    
-    # Check required fields
+
     if not data or not data.get("username") or not data.get("password"):
         return jsonify({"error": "Username and password are required"}), 400
-    
+
     username = data["username"]
     password = data["password"]
-    
+
     try:
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
-        
-        # Find user by username or email
-        cursor.execute("SELECT * FROM users WHERE username = %s OR email = %s", (username, username))
+
+        cursor.execute(
+            "SELECT * FROM Users WHERE username = %s OR email = %s",
+            (username, username)
+        )
+
         user = cursor.fetchone()
-        
+
         cursor.close()
         conn.close()
-        
-        # Check password
+
         if user and check_password_hash(user["password"], password):
-            # Remove password from response
             user.pop("password")
+
+            token = jwt.encode(
+                {
+                    "user_id": user["id"],
+                    "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=2)
+                },
+                SECRET_KEY,
+                algorithm="HS256"
+            )
+
             return jsonify({
                 "message": "Login successful",
-                "user": user
+                "token": token,
+                "user": {
+                    "id": user["id"],
+                    "username": user["username"],
+                    "email": user["email"]
+                }
             }), 200
-        else:
-            return jsonify({"error": "Invalid credentials"}), 401
-            
+
+        return jsonify({"error": "Invalid credentials"}), 401
+
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+
+# RUN APP
 if __name__ == "__main__":
     app.run(debug=True, port=5000)
