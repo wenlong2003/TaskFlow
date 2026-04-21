@@ -3,31 +3,38 @@ import React from "react";
 import "./Navbar.css";
 import Toggle from "./toggle";
 import { Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 interface NavbarProps {
-  isAuthenticated: boolean;
   isDark: boolean;
   toggleDark: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onLogout?: () => void;
   onOpenSidebar: () => void;
 }
 
-function Navbar({ isAuthenticated, onLogout, isDark, toggleDark, onOpenSidebar }: NavbarProps) {
+function Navbar({ isDark, toggleDark, onOpenSidebar }: NavbarProps) {
+  const { isAuthenticated } = useAuth();
+
   return (
     <nav>
       <button className="sidebar-btn" onClick={onOpenSidebar}> ☰ </button>
+
       <ul className="nav-links">
         <li className="link"><Link to="/">Home</Link></li>
         <li className="link"><Link to="/dashboard">Dashboard</Link></li>
         <li className="link"><Link to="/calendar">Calendar</Link></li>
 
-        {!isAuthenticated ? (
+        {!isAuthenticated && (
           <>
-            <li className="link"><Link to="signup" className="signup-btn">Sign Up</Link></li>
-            <li className="link"><Link to="signin" className="login-btn">Log In</Link></li>
+            <li className="link">
+              <Link to="/signup" className="signup-btn">Sign Up</Link>
+            </li>
+            <li className="link">
+              <Link to="/signin" className="login-btn">Log In</Link>
+            </li>
           </>
-        ) : null}
+        )}
       </ul>
+
       <div className="toggle-wrapper">
         <Toggle handleChange={toggleDark} isChecked={isDark} />
       </div>

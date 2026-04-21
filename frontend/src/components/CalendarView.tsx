@@ -11,9 +11,11 @@ import { createEventModalPlugin } from '@schedule-x/event-modal'
 import 'temporal-polyfill/global'
 import "@schedule-x/theme-default/dist/index.css"
 import "./CalendarView.css"
+import { useAuth } from "../context/AuthContext"
 
 function CalendarView() {
   const [eventsService] = useState(() => createEventsServicePlugin())
+  const { token } = useAuth()
   const calendar = useCalendarApp({
     views: [
       createViewDay(),
@@ -26,51 +28,68 @@ function CalendarView() {
   })
 
   useEffect(() => {
-    const userId = localStorage.getItem("userId")
-    if (!userId || !calendar) return
+    if (!calendar) return
+    if (!token) return
 
-    fetch(`/api/tasks?userId=${userId}`)
-  .then(res => res.json())
-  .then(data => {
-    console.log("TASKS FROM BACKEND:", data)
-
-    data.forEach((task: any) => {
-      const isAllDay = task.isAllDay
-
-      if (isAllDay) {
-        const startDate = new Date(task.startTime).toISOString().slice(0, 10)
-        const endDate = new Date(task.endTime).toISOString().slice(0, 10)
-
-        eventsService.add({
-          id: String(task.id),
-          title: task.name,
-          description: task.description,
-          start: Temporal.PlainDate.from(startDate),
-          end: Temporal.PlainDate.from(endDate),
-        })
-      } else {
-        const start = new Date(task.startTime).toISOString()
-        const end = new Date(task.endTime).toISOString()
-
-        eventsService.add({
-          id: String(task.id),
-          title: task.name,
-          description: task.description,
-
-          start: Temporal.ZonedDateTime.from(
-            start.replace("Z", "[America/New_York]")
-          ),
-
-          end: Temporal.ZonedDateTime.from(
-            end.replace("Z", "[America/New_York]")
-          ),
-        })
+    fetch(`/api/tasks`, {
+      headers: {
+        Authorization: `Bearer ${token}`
       }
     })
-  })
-  .catch(console.error)
+      .then(res => res.json())
+      .then(data => {
+        console.log("TASKS FROM BACKEND:", data)
 
-  }, [calendar, eventsService])
+        if (!Array.isArray(data)) {
+          console.error("Expected array but got:", data)
+          return
+        }
+
+        data.forEach((task: any) => {
+          const isAllDay = task.isAllDay
+
+          if (isAllDay) {
+            const startDate = new Date(task.startTime).toISOString().slice(0, 10)
+            const endDate = new Date(task.endTime).toISOString().slice(0, 10)
+
+            eventsService.add({
+              id: String(task.id),
+              title: task.name,
+              description: task.description,
+              start: Temporal.PlainDate.from(startDate),
+              end: Temporal.PlainDate.from(endDate),
+            })
+          } else {
+            const start = new Date(task.startTime).toISOString()
+            const end = new Date(task.endTime).toISOString()
+
+            eventsService.add({
+              id: String(task.id),
+              title: task.name,
+              description: task.description,
+              start: Temporal.ZonedDateTime.from(
+                start.replace("Z", "[America/New_York]")
+              ),
+              end: Temporal.ZonedDateTime.from(
+                end.replace("Z", "[America/New_York]")
+              ),
+            })
+          }
+        })
+      })
+      .catch(console.error)
+  }, [calendar, eventsService, token])
+
+  useEffect(() => {
+    if (token) return
+
+    if (eventsService?.getAll && eventsService?.remove) {
+      const allEvents = eventsService.getAll()
+      allEvents.forEach((event: any) => {
+        eventsService.remove(event.id)
+      })
+    }
+  }, [token, eventsService])
 
   return <ScheduleXCalendar calendarApp={calendar} />
 }

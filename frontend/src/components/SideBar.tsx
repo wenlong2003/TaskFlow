@@ -1,21 +1,22 @@
 import { Link } from "react-router-dom";
 import "./Sidebar.css";
+import { useAuth } from "../context/AuthContext";
 
 interface SidebarProps {
   isOpen: boolean;
-  isAuthenticated: boolean;
   onClose: () => void;
-  onLogout: () => void;
 }
 
-function Sidebar({ isOpen, isAuthenticated, onClose, onLogout }: SidebarProps) {
+function Sidebar({ isOpen, onClose }: SidebarProps) {
+  const { isAuthenticated, logout } = useAuth();
+
   return (
     <div className={`sidebar-overlay ${isOpen ? "open" : ""}`} onClick={onClose}>
       <div className="sidebar" onClick={(e) => e.stopPropagation()}>
         <button className="close-btn" onClick={onClose}>
           ×
         </button>
-        
+
         <div className="sidebar-header">
           <h3>Menu</h3>
         </div>
@@ -27,6 +28,7 @@ function Sidebar({ isOpen, isAuthenticated, onClose, onLogout }: SidebarProps) {
         </div>
 
         <hr />
+
         <div className="sidebar-section">
           {!isAuthenticated ? (
             <div className="auth-links">
@@ -43,7 +45,7 @@ function Sidebar({ isOpen, isAuthenticated, onClose, onLogout }: SidebarProps) {
               <button
                 className="logout-btn"
                 onClick={() => {
-                  onLogout();
+                  logout();
                   onClose();
                 }}
               >

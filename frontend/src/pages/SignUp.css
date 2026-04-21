@@ -43,7 +43,7 @@
   border: none;
   border-radius: var(--border-radius);
   background-color: var(--secondary-background-color);
-  color: var(--text-primary);
+  color: var(--primary-text-color);
   font-size: 18px;
   font-weight: 500;
   cursor: pointer;
@@ -70,6 +70,6 @@
 .signup-container p {
   margin-top: 10px;
   font-size: 14px;
-  color: var(--text-secondary);
+  color: var(--secondary-text-color);
   text-align: center;
 }

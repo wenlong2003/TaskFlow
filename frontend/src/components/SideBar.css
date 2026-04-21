@@ -81,7 +81,7 @@
 .sidebar-links a:hover,
 .auth-links a:hover {
   transform: translateX(6px);
-  box-shadow: 0 0 10px rgba(255,255,255,0.08);
+  box-shadow: 0 0 10px var(--box-shadow-bar);
 }
 
 .sidebar-links a:hover::before,

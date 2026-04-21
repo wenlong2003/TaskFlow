@@ -2,11 +2,7 @@ import { useState } from "react";
 import type { ChangeEvent, SyntheticEvent } from "react";
 import "./SignUp.css";
 
-interface SignUpProps {
-  setIsAuthenticated: (value: boolean) => void;
-}
-
-const SignUp = ({ setIsAuthenticated }: SignUpProps) => {
+const SignUp = () => {
   const [formData, setFormData] = useState({
     username: "",
     email: "",
@@ -38,7 +34,7 @@ const SignUp = ({ setIsAuthenticated }: SignUpProps) => {
         throw new Error(data.error || "Signup failed");
       }
 
-      setIsAuthenticated(true);
+      window.location.href = "/signin";
       
     } catch (err) {
       if (err instanceof Error) {

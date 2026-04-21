@@ -10,43 +10,33 @@ import Home from "./pages/Home";
 import "./App.css";
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isDark, setIsDark] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-  const handleLogout = () => {
-    setIsAuthenticated(false);
-    localStorage.removeItem("token");
-  };
 
   return (
     <BrowserRouter>
       <div data-theme={isDark ? "dark" : "light"}>
-        <Navbar 
-          isAuthenticated={isAuthenticated} 
-          onLogout={handleLogout} 
-          isDark={isDark} 
+        <Navbar
+          isDark={isDark}
           toggleDark={() => setIsDark(!isDark)}
           onOpenSidebar={() => setIsSidebarOpen(prev => !prev)}
         />
+
         <Sidebar
           isOpen={isSidebarOpen}
-          isAuthenticated={isAuthenticated}
           onClose={() => setIsSidebarOpen(false)}
-          onLogout={handleLogout}
         />
 
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/calendar" element={<CalendarView />} />
-          <Route path="/signin" element={<SignIn setIsAuthenticated={setIsAuthenticated} />} />
-          <Route path="/signup" element={<SignUp setIsAuthenticated={setIsAuthenticated} />}/>
+          <Route path="/signin" element={<SignIn />} />
+          <Route path="/signup" element={<SignUp />} />
         </Routes>
       </div>
     </BrowserRouter>
   );
-  
 }
 
 export default App;

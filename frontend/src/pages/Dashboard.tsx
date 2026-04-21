@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { useAuth } from "../context/AuthContext";
 import "./Dashboard.css";
 
 function Dashboard() {
   const [loading, setLoading] = useState(false);
+  const { token } = useAuth();
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -15,10 +17,8 @@ function Dashboard() {
   };
 
   const handleCreateEvent = async (allDay: boolean) => {
-    const userId = localStorage.getItem("userId");
-
-    if (!userId) {
-      alert("User not logged in");
+    if (!token) {
+      alert("You are not authenticated. Please log in again.");
       return;
     }
 
@@ -33,7 +33,6 @@ function Dashboard() {
       let payload: any = {
         name: title,
         description,
-        userId,
         isAllDay: allDay,
       };
 
@@ -57,6 +56,7 @@ function Dashboard() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(payload),
       });

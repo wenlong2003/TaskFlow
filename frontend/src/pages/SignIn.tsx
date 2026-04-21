@@ -1,12 +1,11 @@
 import { useState } from "react";
 import type { ChangeEvent, SyntheticEvent } from "react";
+import { useAuth } from "../context/AuthContext";
 import "./SignIn.css";
 
-interface SignInProps {
-  setIsAuthenticated: (value: boolean) => void;
-}
+const SignIn = () => {
+  const { login } = useAuth();
 
-const SignIn = ({ setIsAuthenticated }: SignInProps) => {
   const [formData, setFormData] = useState({
     username: "",
     password: ""
@@ -34,9 +33,8 @@ const SignIn = ({ setIsAuthenticated }: SignInProps) => {
 
       if (!res.ok) throw new Error(data.error);
 
-      localStorage.setItem("token", data.token);
+      login(data.token, data.user);
 
-      setIsAuthenticated(true);
     } catch (err) {
       if (err instanceof Error) setError(err.message);
       else setError("Something went wrong");
@@ -50,7 +48,7 @@ const SignIn = ({ setIsAuthenticated }: SignInProps) => {
       <form onSubmit={handleSubmit} className="signin-form">
         <h2>Sign In</h2>
         {error && <p className="error-message">{error}</p>}
-        
+
         <input
           name="username"
           placeholder="Username or Email"
@@ -58,7 +56,7 @@ const SignIn = ({ setIsAuthenticated }: SignInProps) => {
           onChange={handleChange}
           required
         />
-        
+
         <input
           name="password"
           type="password"
@@ -67,7 +65,7 @@ const SignIn = ({ setIsAuthenticated }: SignInProps) => {
           onChange={handleChange}
           required
         />
-        
+
         <button type="submit" disabled={loading}>
           {loading ? "Loading..." : "Sign In"}
         </button>
