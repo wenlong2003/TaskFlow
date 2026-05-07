@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import "./Settings.css";
@@ -12,34 +12,23 @@ function Settings() {
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [deleteUsername, setDeleteUsername] = useState("");
+  const [deletePassword, setDeletePassword] = useState("");
 
   const navigate = useNavigate();
 
   const token = localStorage.getItem("token");
 
-  const handleSaveProfile = async () => {
-    try {
-      const res = await fetch("/api/user", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ username, email }),
-      });
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
 
-      const data = await res.json();
+    if (storedUser) {
+      const parsedUser = JSON.parse(storedUser);
 
-      if (!res.ok) {
-        alert(data.error || "Failed to update profile");
-        return;
-      }
-
-      alert("Profile updated successfully");
-    } catch (err) {
-      alert("Error updating profile");
+      setUsername(parsedUser.username || "");
+      setEmail(parsedUser.email || "");
     }
-  };
+  }, []);
 
   const handleChangePassword = async () => {
     try {
@@ -70,6 +59,60 @@ function Settings() {
     }
   };
 
+  const handleDeleteAccount = async () => {
+    if (deleteUsername !== username) {
+      alert("Username does not match your account");
+      return;
+    }
+
+    const confirmDelete = window.confirm(
+      "Are you sure you want to permanently delete your account? This action cannot be undone."
+    );
+
+    if (!confirmDelete) return;
+
+    try {
+      const verifyRes = await fetch("/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: deleteUsername,
+          password: deletePassword,
+        }),
+      });
+
+      const verifyData = await verifyRes.json();
+
+      if (!verifyRes.ok) {
+        alert(verifyData.error || "Incorrect password");
+        return;
+      }
+
+      const deleteRes = await fetch("/api/user", {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const deleteData = await deleteRes.json();
+
+      if (!deleteRes.ok) {
+        alert(deleteData.error || "Failed to delete account");
+        return;
+      }
+
+      alert("Account deleted successfully");
+
+      logout();
+      navigate("/", { replace: true });
+    } catch (err) {
+      alert("Error deleting account");
+    }
+  };
+
   const handleLogout = () => {
     logout();
     navigate("/", { replace: true });
@@ -81,23 +124,17 @@ function Settings() {
         return (
           <div>
             <h2>Profile</h2>
-            <p>Edit your personal information here.</p>
+            <p>Your account information.</p>
 
-            <input
-              placeholder="Username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-            />
+            <div className="profile-info">
+              <label>Username</label>
+              <div className="profile-value">{username}</div>
+            </div>
 
-            <input
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-
-            <button className="save-btn" onClick={handleSaveProfile}>
-              Save Changes
-            </button>
+            <div className="profile-info">
+              <label>Email</label>
+              <div className="profile-value">{email}</div>
+            </div>
           </div>
         );
 
@@ -130,6 +167,36 @@ function Settings() {
           </div>
         );
 
+      case "danger":
+        return (
+          <div>
+            <h2>Delete Account</h2>
+            <p>
+              Permanently delete your account and all associated data.
+            </p>
+
+            <input
+              placeholder="Confirm Username"
+              value={deleteUsername}
+              onChange={(e) => setDeleteUsername(e.target.value)}
+            />
+
+            <input
+              placeholder="Confirm Password"
+              type="password"
+              value={deletePassword}
+              onChange={(e) => setDeletePassword(e.target.value)}
+            />
+
+            <button
+              className="delete-account-btn"
+              onClick={handleDeleteAccount}
+            >
+              Delete Account
+            </button>
+          </div>
+        );
+
       default:
         return null;
     }
@@ -150,6 +217,12 @@ function Settings() {
           onClick={() => setActiveTab("security")}
         >
           Security
+        </button>
+        <button
+          className={activeTab === "danger" ? "active danger-tab" : "danger-tab"}
+          onClick={() => setActiveTab("danger")}
+        >
+          Delete Account
         </button>
 
         <button className="logout-btn" onClick={handleLogout}>
