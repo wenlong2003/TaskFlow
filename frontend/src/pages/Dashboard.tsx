@@ -1,30 +1,29 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import "./Dashboard.css";
+import TimeModal from "../components/TimeModal";
+import EventList from "../components/EventList";
+import { fetchEvents, createEvent, formatDateTime } from "../utils/eventApi";
 
 function Dashboard() {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<boolean>(false);
   const { token } = useAuth();
 
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [startTime, setStartTime] = useState("");
-  const [endTime, setEndTime] = useState("");
-  const [deleteId, setDeleteId] = useState("");
+  const [title, setTitle] = useState<string>("");
+  const [description, setDescription] = useState<string>("");
+  const [startTime, setStartTime] = useState<string>("");
+  const [endTime, setEndTime] = useState<string>("");
   const [events, setEvents] = useState<any[]>([]);
-
-  const formatDateTime = (value: string) => {
-    return value.replace("T", " ") + ":00";
-  };
+  const [isFullDay, setIsFullDay] = useState<boolean>(false);
 
   const handleCreateEvent = async (allDay: boolean) => {
     if (!token) {
-      alert("You are not authenticated. Please log in again.");
+      alert("You are not authenticated.");
       return;
     }
 
     if (!title) {
-      alert("Please fill all required fields");
+      alert("Please enter a title.");
       return;
     }
 
@@ -40,11 +39,11 @@ function Dashboard() {
       if (allDay) {
         const dateOnly = startTime.split("T")[0];
 
-        payload.startTime = dateOnly + " 00:00:00";
-        payload.endTime = dateOnly + " 23:59:59";
+        payload.startTime = `${dateOnly} 00:00:00`;
+        payload.endTime = `${dateOnly} 23:59:59`;
       } else {
         if (!startTime || !endTime) {
-          alert("Please fill all required fields");
+          alert("Please fill all required fields.");
           setLoading(false);
           return;
         }
@@ -53,17 +52,13 @@ function Dashboard() {
         payload.endTime = formatDateTime(endTime);
       }
 
-      await fetch("/api/tasks", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
-      });
+      await createEvent(token, payload);
 
-      alert("Event created! Go to calendar to see it.");
-      fetchEvents();
+      alert("Event created!");
+
+      fetchEvents(token)
+        .then(setEvents)
+        .catch(console.error);
 
       setTitle("");
       setDescription("");
@@ -71,200 +66,145 @@ function Dashboard() {
       setEndTime("");
     } catch (err) {
       console.error(err);
-      alert("Failed to create event");
+      alert("Failed to create event.");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDeleteEvent = async () => {
-    if (!token) {
-      alert("You are not authenticated. Please log in again.");
-      return;
-    }
-
-    if (!deleteId) {
-      alert("Please enter an event ID to delete");
-      return;
-    }
-
-    try {
-      const res = await fetch(`/api/tasks/${deleteId}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!res.ok) {
-        throw new Error("Failed to delete");
-      }
-
-      alert("Event deleted successfully");
-      setDeleteId("");
-      fetchEvents();
-    } catch (err) {
-      console.error(err);
-      alert("Failed to delete event");
-    }
-  };
-
-  const fetchEvents = async () => {
+  useEffect(() => {
     if (!token) return;
 
-    try {
-      const res = await fetch("/api/tasks", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!res.ok) {
-        throw new Error("Failed to fetch events");
-      }
-
-      const data = await res.json();
-      setEvents(data);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  useEffect(() => {
-    fetchEvents();
+    fetchEvents(token)
+      .then(setEvents)
+      .catch((err) => console.error(err));
   }, [token]);
 
   return (
     <main className="dashboard-container">
-      {/* LEFT COLUMN */}
+
+      {/* LEFT SIDE */}
       <div className="content-left">
 
         {/* CREATE EVENT */}
-        <section className="container-create">
-          <h1 className="dashboard-title">Create Event</h1>
+        <section className="modern-create-container">
+
+          <h1 className="modern-dashboard-title">
+            Create Event
+          </h1>
 
           <form
-            className="event-form"
-            onSubmit={(e) => e.preventDefault()}
+            className="modern-event-form"
+            onSubmit={(
+              e: React.FormEvent<HTMLFormElement>
+            ) => e.preventDefault()}
           >
-            <input
-              className="input"
-              type="text"
-              placeholder="Event title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
 
-            <textarea
-              className="input"
-              placeholder="Description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
+            {/* TITLE */}
+            <div className="modern-create-section">
+              <div className="modern-field">
+                <label className="modern-label">
+                  Title
+                </label>
 
-            <label>Start Time</label>
-            <input
-              className="input"
-              type="datetime-local"
-              value={startTime}
-              onChange={(e) => setStartTime(e.target.value)}
-            />
+                <input
+                  className="modern-input"
+                  type="text"
+                  value={title}
+                  onChange={(
+                    e: React.ChangeEvent<HTMLInputElement>
+                  ) => setTitle(e.target.value)}
+                />
+              </div>
+            </div>
 
-            <label>End Time</label>
-            <input
-              className="input"
-              type="datetime-local"
-              value={endTime}
-              onChange={(e) => setEndTime(e.target.value)}
-            />
+            {/* DESCRIPTION */}
+            <div className="modern-create-section">
+              <div className="modern-field">
+                <label className="modern-label">
+                  Description
+                </label>
 
-            <div className="btn-group">
+                <textarea
+                  className="modern-input modern-textarea"
+                  value={description}
+                  onChange={(
+                    e: React.ChangeEvent<HTMLTextAreaElement>
+                  ) => setDescription(e.target.value)}
+                />
+              </div>
+            </div>
+
+            {/* DATE + TIME */}
+            <div className="modern-create-section">
+              <div className="modern-datetime-container">
+                <div className="modern-datetime-row">
+
+                  <TimeModal
+                    label="Start date"
+                    value={startTime}
+                    onChange={setStartTime}
+                    defaultTime="18:00"
+                  />
+
+                  <span className="modern-until">until</span>
+
+                  <TimeModal
+                    label="End date"
+                    value={endTime}
+                    onChange={setEndTime}
+                    defaultTime="19:00"
+                  />
+
+                </div>
+              </div>
+            </div>
+
+            {/* FULL DAY */}
+            <div className="modern-create-section">
+              <div className="modern-checkbox-row">
+                <input
+                  className="modern-checkbox"
+                  type="checkbox"
+                  id="fullDay"
+                  checked={isFullDay}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setIsFullDay(e.target.checked)
+                  }
+                />
+                <label htmlFor="fullDay">
+                  Full-day event
+                </label>
+              </div>
+            </div>
+
+            
+
+            {/* BUTTONS */}
+            <div className="modern-button-row">
+
               <button
-                className="create-event-btn"
+                className="modern-save-btn"
                 type="button"
                 disabled={loading}
-                onClick={() => handleCreateEvent(false)}
+                onClick={() => handleCreateEvent(isFullDay)}
               >
-                {loading ? "Creating..." : "Timed Event"}
+                {loading ? "Creating..." : "Create"}
               </button>
 
-              <button
-                className="create-event-btn"
-                type="button"
-                disabled={loading}
-                onClick={() => handleCreateEvent(true)}
-              >
-                {loading ? "Creating..." : "All Day Event"}
-              </button>
             </div>
           </form>
         </section>
       </div>
 
-      {/* RIGHT COLUMN */}
+      {/* RIGHT SIDE */}
       <section className="container-events">
-        <h2 className="dashboard-title">Upcoming Events</h2>
 
-        <div className="event-list">
-          {events.length === 0 ? (
-            <p>No events schedule</p>
-          ) : (
-            [...events]
-              .sort(
-                (a, b) =>
-                  new Date(a.startTime).getTime() -
-                  new Date(b.startTime).getTime()
-              )
-              .map((event) => (
-                <div key={event.id} className="event-card">
-                  <div className="event-card-header">
-                    <div className="event-actions">
-                      <button
-                        className="edit-btn"
-                        onClick={() => alert(`Edit event ${event.id} (implement later)`)}
-                      >
-                      <i className="bi bi-pencil-square editIcon"></i>
-                      </button>
-                      <button
-                        className="delete-btn"
-                        onClick={async () => {
-                          if (!token) {
-                            alert("You are not authenticated. Please log in again.");
-                            return;
-                          }
+        <h2 className="dashboard-title">
+          Upcoming Events
+        </h2>
 
-                          try {
-                            const res = await fetch(`/api/tasks/${event.id}`, {
-                              method: "DELETE",
-                              headers: {
-                                Authorization: `Bearer ${token}`,
-                              },
-                            });
-
-                            if (!res.ok) throw new Error("Failed to delete");
-
-                            alert("Event deleted successfully");
-                            fetchEvents();
-                          } catch (err) {
-                            console.error(err);
-                            alert("Failed to delete event");
-                          }
-                        }}
-                      >
-                      <i className="bi bi-trash deleteIcon"></i>
-                      </button>
-                    </div>
-                  </div>
-
-                  <strong>{event.name}</strong>
-                  <p>{event.description}</p>
-                  <small>
-                    {event.startTime} - {event.endTime}
-                  </small>
-                </div>
-              ))
-          )}
-        </div>
+        <EventList events={events} />
       </section>
     </main>
   );

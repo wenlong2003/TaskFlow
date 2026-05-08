@@ -1,6 +1,19 @@
 import "./Home.css";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 function Home() {
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
+
+  const handleGetStarted = () => {
+    if (isAuthenticated) {
+      navigate("/dashboard");
+    } else {
+      navigate("/signup");
+    }
+  };
+
   return (
     <>
       <div className="wrapper">
@@ -16,7 +29,9 @@ function Home() {
           <section className="hero">
             <h1 className="title">Organize Your Life</h1>
             <p className="subtitle">Stay on top of your tasks, events, and deadlines—without the chaos.</p>
-            <button className="cta-btn">Get Started</button>
+            <button className="cta-btn" onClick={handleGetStarted}>
+              Get Started
+            </button>
           </section>
         </div>
 
