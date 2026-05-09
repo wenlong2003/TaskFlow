@@ -48,8 +48,8 @@ function Dashboard() {
           return;
         }
 
-        payload.startTime = formatDateTime(startTime);
-        payload.endTime = formatDateTime(endTime);
+        payload.startTime = new Date(startTime).toISOString();
+        payload.endTime = new Date(endTime).toISOString();
       }
 
       await createEvent(token, payload);
@@ -79,6 +79,26 @@ function Dashboard() {
       .then(setEvents)
       .catch((err) => console.error(err));
   }, [token]);
+
+  const handleDelete = async (id: number) => {
+    if (!token) return;
+
+    try {
+      await fetch(`/api/tasks/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      fetchEvents(token)
+        .then(setEvents)
+        .catch(console.error);
+
+    } catch (err) {
+      console.error("Failed to delete event:", err);
+    }
+  };
 
   return (
     <main className="dashboard-container">
@@ -204,7 +224,7 @@ function Dashboard() {
           Upcoming Events
         </h2>
 
-        <EventList events={events} />
+        <EventList events={events} onDelete={handleDelete} />
       </section>
     </main>
   );

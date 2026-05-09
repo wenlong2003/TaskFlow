@@ -10,9 +10,10 @@ type Event = {
 
 type Props = {
   events: Event[];
+  onDelete?: (id: number) => void;
 };
 
-function EventList({ events }: Props) {
+function EventList({ events, onDelete }: Props) {
   return (
     <div className="event-list">
       {events.length === 0 ? (
@@ -26,6 +27,26 @@ function EventList({ events }: Props) {
           )
           .map((event) => (
             <div key={event.id} className="event-card">
+              <div className="event-actions">
+                <button className="edit-btn" title="Edit"><i className="bi bi-pencil-square"></i></button>
+                <button
+                  className="delete-btn"
+                  title="Delete"
+                  onClick={() => {
+                    if (!onDelete) return;
+
+                    const confirmDelete = window.confirm(
+                      "Are you sure you want to delete this event?"
+                    );
+
+                    if (confirmDelete) {
+                      onDelete(event.id);
+                    }
+                  }}
+                >
+                <i className="bi bi-trash3"></i>
+                </button>
+              </div>
               <strong>{event.name}</strong>
 
               <p>{event.description}</p>
