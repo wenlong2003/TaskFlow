@@ -3,7 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import "./Dashboard.css";
 import TimeModal from "../components/TimeModal";
 import EventList from "../components/EventList";
-import { fetchEvents, createEvent, formatDateTime } from "../utils/eventApi";
+import { fetchEvents, createEvent } from "../utils/eventApi";
 
 function Dashboard() {
   const [loading, setLoading] = useState<boolean>(false);

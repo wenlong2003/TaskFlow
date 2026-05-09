@@ -51,32 +51,34 @@ const SignIn = () => {
   };
 
   return (
-    <div className="signin-container">
-      <form onSubmit={handleSubmit} className="signin-form">
-        <h2>Sign In</h2>
-        {error && <p className="error-message">{error}</p>}
+    <div className="signin-wrapper">
+      <div className="signin-container">
+        <form onSubmit={handleSubmit} className="signin-form">
+          <h2>Sign In</h2>
+          {error && <p className="error-message">{error}</p>}
 
-        <input
-          name="username"
-          placeholder="Username or Email"
-          value={formData.username}
-          onChange={handleChange}
-          required
-        />
+          <input
+            name="username"
+            placeholder="Username or Email"
+            value={formData.username}
+            onChange={handleChange}
+            required
+          />
 
-        <input
-          name="password"
-          type="password"
-          placeholder="Password"
-          value={formData.password}
-          onChange={handleChange}
-          required
-        />
+          <input
+            name="password"
+            type="password"
+            placeholder="Password"
+            value={formData.password}
+            onChange={handleChange}
+            required
+          />
 
-        <button type="submit" disabled={loading}>
-          {loading ? "Loading..." : "Sign In"}
-        </button>
-      </form>
+          <button type="submit" disabled={loading}>
+            {loading ? "Loading..." : "Sign In"}
+          </button>
+        </form>
+      </div>
     </div>
   );
 };

@@ -84,8 +84,8 @@ def insert_task():
         return jsonify({"error": "Missing required fields"}), 400
 
     name = data["name"]
-    startTime = data.get("startTime")
-    endTime = data.get("endTime")
+    start_dt = datetime.datetime.fromisoformat(data.get("startTime").replace("Z", ""))
+    end_dt = datetime.datetime.fromisoformat(data.get("endTime").replace("Z", ""))
     description = data.get("description", "")
     isAllDay = data.get("isAllDay", False)
     userId = request.user_id
@@ -98,7 +98,14 @@ def insert_task():
         VALUES (%s, %s, %s, %s, %s, %s)
     """
 
-    cursor.execute(sql, (name, description, startTime, endTime, isAllDay, userId))
+    cursor.execute(sql, (
+        name,
+        description,
+        start_dt.strftime("%Y-%m-%d %H:%M:%S"),
+        end_dt.strftime("%Y-%m-%d %H:%M:%S"),
+        isAllDay,
+        userId
+    ))
     conn.commit()
 
     cursor.close()

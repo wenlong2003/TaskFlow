@@ -35,7 +35,6 @@ const SignUp = () => {
       }
 
       window.location.href = "/signin";
-      
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
@@ -48,42 +47,44 @@ const SignUp = () => {
   };
 
   return (
-    <div className="signup-container">
-      <form onSubmit={handleSubmit} className="signup-form">
-        <h2>Sign Up</h2>
+    <div className="signup-wrapper">
+      <div className="signup-container">
+        <form onSubmit={handleSubmit} className="signup-form">
+          <h2>Sign Up</h2>
 
-        {error && <p className="error-message">{error}</p>}
+          {error && <p className="error-message">{error}</p>}
 
-        <input
-          name="username"
-          placeholder="Username"
-          value={formData.username}
-          onChange={handleChange}
-          required
-        />
+          <input
+            name="username"
+            placeholder="Username"
+            value={formData.username}
+            onChange={handleChange}
+            required
+          />
 
-        <input
-          name="email"
-          type="email"
-          placeholder="Email"
-          value={formData.email}
-          onChange={handleChange}
-          required
-        />
+          <input
+            name="email"
+            type="email"
+            placeholder="Email"
+            value={formData.email}
+            onChange={handleChange}
+            required
+          />
 
-        <input
-          name="password"
-          type="password"
-          placeholder="Password"
-          value={formData.password}
-          onChange={handleChange}
-          required
-        />
+          <input
+            name="password"
+            type="password"
+            placeholder="Password"
+            value={formData.password}
+            onChange={handleChange}
+            required
+          />
 
-        <button type="submit" disabled={loading}>
-          {loading ? "Loading..." : "Sign Up"}
-        </button>
-      </form>
+          <button type="submit" disabled={loading}>
+            {loading ? "Loading..." : "Sign Up"}
+          </button>
+        </form>
+      </div>
     </div>
   );
 };

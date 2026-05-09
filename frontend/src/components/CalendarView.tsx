@@ -1,5 +1,7 @@
+import "temporal-polyfill/global"
 import { useCalendarApp, ScheduleXCalendar } from '@schedule-x/react'
 import { useEffect, useState } from 'react'
+import type { CalendarEventExternal } from '@schedule-x/calendar'
 import {
   createViewDay,
   createViewMonthAgenda,
@@ -8,7 +10,6 @@ import {
 } from '@schedule-x/calendar'
 import { createEventsServicePlugin } from '@schedule-x/events-service'
 import { createEventModalPlugin } from '@schedule-x/event-modal'
-import 'temporal-polyfill/global'
 import "@schedule-x/theme-default/dist/index.css"
 import "./CalendarView.css"
 import { useAuth } from "../context/AuthContext"
@@ -17,6 +18,7 @@ function CalendarView() {
   const [eventsService] = useState(() => createEventsServicePlugin())
   const { token } = useAuth()
   const calendar = useCalendarApp({
+    locale: 'en-GB',
     views: [
       createViewDay(),
       createViewWeek(),
@@ -39,43 +41,31 @@ function CalendarView() {
       .then(res => res.json())
       .then(data => {
         console.log("TASKS FROM BACKEND:", data)
-
         if (!Array.isArray(data)) {
           console.error("Expected array but got:", data)
           return
         }
 
-        data.forEach((task: any) => {
-          const isAllDay = task.isAllDay
+        const formattedEvents: CalendarEventExternal[] = data.map((task: any) => {
+          const startDate = new Date(task.startTime)
+          const endDate = new Date(task.endTime)
 
-          if (isAllDay) {
-            const startDate = new Date(task.startTime).toISOString().slice(0, 10)
-            const endDate = new Date(task.endTime).toISOString().slice(0, 10)
+          const start = Temporal.Instant.fromEpochMilliseconds(startDate.getTime())
+            .toZonedDateTimeISO(Temporal.Now.timeZoneId())
 
-            eventsService.add({
-              id: String(task.id),
-              title: task.name,
-              description: task.description,
-              start: Temporal.PlainDate.from(startDate),
-              end: Temporal.PlainDate.from(endDate),
-            })
-          } else {
-            const start = new Date(task.startTime).toISOString()
-            const end = new Date(task.endTime).toISOString()
+          const end = Temporal.Instant.fromEpochMilliseconds(endDate.getTime())
+            .toZonedDateTimeISO(Temporal.Now.timeZoneId())
 
-            eventsService.add({
-              id: String(task.id),
-              title: task.name,
-              description: task.description,
-              start: Temporal.ZonedDateTime.from(
-                start.replace("Z", "[America/New_York]")
-              ),
-              end: Temporal.ZonedDateTime.from(
-                end.replace("Z", "[America/New_York]")
-              ),
-            })
+          return {
+            id: String(task.id),
+            title: task.name,
+            description: task.description,
+            start,
+            end,
           }
         })
+
+        eventsService.set(formattedEvents)
       })
       .catch(console.error)
   }, [calendar, eventsService, token])
@@ -91,7 +81,11 @@ function CalendarView() {
     }
   }, [token, eventsService])
 
-  return <ScheduleXCalendar calendarApp={calendar} />
+  return (
+    <div className="calendar-wrapper">
+      <ScheduleXCalendar calendarApp={calendar} />
+    </div>
+  )
 }
 
 export default CalendarView

@@ -1,3 +1,30 @@
+.calendar-wrapper {
+  background-color: var(--bg-page);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+
 .sx-react-calendar-wrapper {
   margin: auto;
+  width: 100%;
+  max-width: 900px;
+  transform: scale(0.92);
 }
+
+.calendar-wrapper {
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+.sx__calendar {
+  background-color: var(--sx__week-header);
+}
+
+.sx__week-header {
+  background-color: var(--sx__week-header);
+}
+
+
+

@@ -60,7 +60,59 @@
     --accent-soft: rgba(9, 105, 218, 0.1);
     --shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
 
+    /* Signup Page */
+    --signup-bg: linear-gradient(180deg, #f5f7fb, #eef2f7);
+    --signup-container-bg: rgba(255, 255, 255, 0.85);
+    --signup-input-bg: #ffffff;
+    --signup-border: 1px solid rgba(229, 231, 235, 0.8);
+    --signup-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+    --signup-btn-bg: rgba(45, 125, 254);
+    --signup-btn-hover: rgba(43, 110, 255);
+    --signup-text: #1f2328;
+    --signup-muted-text: #656d76;
 
+    /* Schedule-X Theme (Light) */
+    --sx-color-primary: var(--signup-btn-bg);
+    --sx-color-on-primary: #ffffff;
+    --sx-color-primary-container: rgba(45, 125, 254, 0.15);
+    --sx-color-on-primary-container: var(--signup-text);
+
+    --sx-color-secondary: #625b71;
+    --sx-color-on-secondary: #ffffff;
+    --sx-color-secondary-container: rgba(98, 91, 113, 0.15);
+    --sx-color-on-secondary-container: var(--signup-text);
+
+    --sx-color-tertiary: #7d5260;
+    --sx-color-on-tertiary: #ffffff;
+    --sx-color-tertiary-container: rgba(125, 82, 96, 0.15);
+    --sx-color-on-tertiary-container: var(--signup-text);
+
+    --sx-color-surface: var(--signup-container-bg);
+    --sx-color-surface-dim: rgba(255, 255, 255, 0.6);
+    --sx-color-surface-bright: rgba(255, 255, 255, 0.9);
+    --sx-color-on-surface: var(--signup-text);
+
+    --sx-color-surface-container: rgba(255, 255, 255, 0.6);
+    --sx-color-surface-container-low: rgba(255, 255, 255, 0.4);
+    --sx-color-surface-container-high: rgba(255, 255, 255, 0.8);
+
+    --sx-color-background: transparent;
+    --sx-color-on-background: var(--signup-text);
+
+    --sx-color-outline: rgba(0, 0, 0, 0.2);
+    --sx-color-outline-variant: rgba(0, 0, 0, 0.25);
+
+    --sx-color-shadow: rgba(0, 0, 0, 0.2);
+    --sx-color-surface-tint: var(--signup-btn-bg);
+
+    --sx-color-neutral: var(--sx-color-outline);
+    --sx-color-neutral-variant: var(--sx-color-outline-variant);
+
+    --sx-internal-color-gray-ripple-background: rgba(0, 0, 0, 0.08);
+    --sx-internal-color-light-gray: rgba(255, 255, 255, 0.6);
+    --sx-internal-color-text: var(--signup-text);
+
+    --sx__week-header: var(--primary-background-color);
 }
 
 [data-theme="dark"] {
@@ -98,6 +150,37 @@
     --accent-color: #2f81f7;
     --accent-soft: rgba(47, 129, 247, 0.15);
     --shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+
+    /* Signup Page */
+    --signup-bg: linear-gradient(180deg, #0f1115, #0a0c10);
+    --signup-container-bg: rgba(255, 255, 255, 0.04);
+    --signup-input-bg: #0f1115;
+    --signup-border: 1px solid rgba(255, 255, 255, 0.08);
+    --signup-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+    --signup-btn-bg: rgba(248, 113, 113);
+    --signup-btn-hover: rgba(255, 97, 97);
+    --signup-text: #e6edf3;
+    --signup-muted-text: #848d97;
+
+    /* Schedule-X Theme (Dark) */
+    
+    /* four */
+    --sx-color-primary: var(--signup-btn-bg); 
+    --sx-color-on-primary: #ffffff;
+    --sx-color-primary-container: rgba(248, 113, 113, 0.5);
+    --sx-color-on-primary-container: var(--signup-text);
+
+    --sx-color-surface-dim: rgba(255, 255, 255, 0.05);
+    --sx-color-on-background: var(--signup-text);
+    --sx-color-outline: rgba(255, 255, 255, 1);
+    --sx-color-neutral: var(--sx-color-outline);
+
+    --sx-internal-color-gray-ripple-background: rgba(255, 255, 255, 0.08);
+    --sx-internal-color-light-gray: var(--btn-color);
+    --sx-internal-color-text: var(--signup-text);
+
+    --sx__week-header: var(--primary-background-color);
+
 }
 
 * {
@@ -111,8 +194,17 @@
 }
 
 .sx-react-calendar-wrapper {
-  width: 1200px;
-  max-width: 100vw;
-  height: 800px;
+  width: 100%;
+  max-width: 900px;
+  height: 80vh;
   max-height: 90vh;
+
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  background: var(--signup-container-bg);
+  box-shadow: var(--signup-shadow);
+  border: 1px solid var(--sx-color-outline);
+
+  display: flex;
+  flex-direction: column;
 }

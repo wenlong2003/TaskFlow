@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@schedule-x/theme-shadcn": "^4.5.0",
     "use-local-storage": "^3.0.0"
   }
 }

@@ -1,36 +1,71 @@
+.signin-wrapper {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at top left, rgba(45, 125, 254, 0.18), transparent 35%),
+    radial-gradient(circle at bottom right, rgba(248, 113, 113, 0.16), transparent 35%),
+    var(--signup-bg);
+  transition: background 0.3s ease;
+}
+
+.signin-wrapper::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+}
+
 .signin-container {
+  width: 100%;
   max-width: 400px;
   margin: 50px auto;
   padding: 30px 25px;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  background-color: var(--signup-container-bg);
+  border-radius: var(--border-radius);
+  box-shadow: var(--signup-shadow);
   display: flex;
   flex-direction: column;
   align-items: center;
   transition: background-color 0.3s ease;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  position: relative;
+  z-index: 1;
 }
 
 .signin-container h2 {
   text-align: center;
   margin-bottom: 25px;
   font-size: 28px;
-  color: black;
+  color: var(--signup-text);
 }
 
 .signin-container input {
   width: 100%;
   padding: 12px 15px;
   margin-bottom: 15px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
+  border: var(--signup-border);
+  border-radius: var(--border-radius);
   font-size: 16px;
   outline: none;
   transition: border-color 0.2s, box-shadow 0.2s;
-  color: black;
+  background-color: var(--signup-input-bg);
+  color: var(--signup-text);
 }
 
 .signin-container input:focus {
-  border-color: var(--primary-background-color);
+  border-color: var(--signup-btn-bg);
   box-shadow: 0 0 5px rgba(0, 123, 255, 0.4);
 }
 
@@ -39,9 +74,9 @@
   padding: 12px 0;
   margin-top: 10px;
   border: none;
-  border-radius: 8px;
-  background-color: var(--primary-background-color);
-  color: var(--primary-text-color);
+  border-radius: var(--border-radius);
+  background-color: var(--signup-btn-bg);
+  color: white;
   font-size: 18px;
   font-weight: 500;
   cursor: pointer;
@@ -49,7 +84,7 @@
 }
 
 .signin-container button:hover {
-  background-color: var(--primary-background-color);
+  background-color: var(--signup-btn-hover);
   transform: translateY(-1px);
 }
 
@@ -69,6 +104,6 @@
 .signin-container p {
   margin-top: 10px;
   font-size: 14px;
-  color: var(--primary-text-color);
+  color: var(--signup-muted-text);
   text-align: center;
 }
