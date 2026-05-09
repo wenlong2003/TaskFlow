@@ -76,43 +76,18 @@
     --sx-color-on-primary: #ffffff;
     --sx-color-primary-container: rgba(45, 125, 254, 0.15);
     --sx-color-on-primary-container: var(--signup-text);
-
-    --sx-color-secondary: #625b71;
-    --sx-color-on-secondary: #ffffff;
-    --sx-color-secondary-container: rgba(98, 91, 113, 0.15);
-    --sx-color-on-secondary-container: var(--signup-text);
-
-    --sx-color-tertiary: #7d5260;
-    --sx-color-on-tertiary: #ffffff;
-    --sx-color-tertiary-container: rgba(125, 82, 96, 0.15);
-    --sx-color-on-tertiary-container: var(--signup-text);
-
-    --sx-color-surface: var(--signup-container-bg);
     --sx-color-surface-dim: rgba(255, 255, 255, 0.6);
-    --sx-color-surface-bright: rgba(255, 255, 255, 0.9);
-    --sx-color-on-surface: var(--signup-text);
-
-    --sx-color-surface-container: rgba(255, 255, 255, 0.6);
-    --sx-color-surface-container-low: rgba(255, 255, 255, 0.4);
-    --sx-color-surface-container-high: rgba(255, 255, 255, 0.8);
-
     --sx-color-background: transparent;
     --sx-color-on-background: var(--signup-text);
-
-    --sx-color-outline: rgba(0, 0, 0, 0.2);
-    --sx-color-outline-variant: rgba(0, 0, 0, 0.25);
-
-    --sx-color-shadow: rgba(0, 0, 0, 0.2);
+    --sx-color-outline: rgba(0, 0, 0, 0.4);
+    --sx-color-outline-variant: rgba(0, 0, 0, 0.1);
     --sx-color-surface-tint: var(--signup-btn-bg);
-
     --sx-color-neutral: var(--sx-color-outline);
-    --sx-color-neutral-variant: var(--sx-color-outline-variant);
-
     --sx-internal-color-gray-ripple-background: rgba(0, 0, 0, 0.08);
     --sx-internal-color-light-gray: rgba(255, 255, 255, 0.6);
     --sx-internal-color-text: var(--signup-text);
-
     --sx__week-header: var(--primary-background-color);
+    --container: white;
 }
 
 [data-theme="dark"] {
@@ -172,14 +147,15 @@
 
     --sx-color-surface-dim: rgba(255, 255, 255, 0.05);
     --sx-color-on-background: var(--signup-text);
-    --sx-color-outline: rgba(255, 255, 255, 1);
+    --sx-color-outline: rgba(255, 255, 255, 0.4);
     --sx-color-neutral: var(--sx-color-outline);
-
+    --sx-color-background: transparent;
     --sx-internal-color-gray-ripple-background: rgba(255, 255, 255, 0.08);
     --sx-internal-color-light-gray: var(--btn-color);
     --sx-internal-color-text: var(--signup-text);
 
     --sx__week-header: var(--primary-background-color);
+    --container: rgb(31, 31, 31);
 
 }
 

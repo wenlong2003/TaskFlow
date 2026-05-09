@@ -25,3 +25,19 @@
 .sx__week-header {
   background-color: var(--sx__week-header);
 }
+
+.sx__date-picker-popup {
+  background-color: var(--container);
+}
+
+.sx__view-selection-items {
+  background-color: var(--container);
+}
+
+.sx__event-modal {
+  background-color: var(--container);
+}
+
+.sx__date-input-wrapper {
+  background-color: var(--container);
+}
