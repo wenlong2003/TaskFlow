@@ -364,6 +364,53 @@ def delete_account():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+# UPDATE TASK (PROTECTED)
+@app.route("/api/tasks/<int:task_id>", methods=["PUT"])
+@token_required
+def update_task(task_id):
+    data = request.get_json()
+
+    if not data:
+        return jsonify({"error": "Missing data"}), 400
+
+    name = data.get("name")
+    description = data.get("description", "")
+    start_dt = datetime.datetime.fromisoformat(data.get("startTime").replace("Z", ""))
+    end_dt = datetime.datetime.fromisoformat(data.get("endTime").replace("Z", ""))
+    isAllDay = data.get("isAllDay", False)
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        UPDATE Tasks
+        SET name = %s,
+            description = %s,
+            startTime = %s,
+            endTime = %s,
+            isAllDay = %s
+        WHERE id = %s AND userId = %s
+    """, (
+        name,
+        description,
+        start_dt.strftime("%Y-%m-%d %H:%M:%S"),
+        end_dt.strftime("%Y-%m-%d %H:%M:%S"),
+        isAllDay,
+        task_id,
+        request.user_id
+    ))
+
+    conn.commit()
+
+    if cursor.rowcount == 0:
+        cursor.close()
+        conn.close()
+        return jsonify({"error": "Task not found"}), 404
+
+    cursor.close()
+    conn.close()
+
+    return jsonify({"message": "Task updated"}), 200
 # RUN APP
 if __name__ == "__main__":
     app.run(debug=True, port=5000)

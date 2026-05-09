@@ -11,15 +11,17 @@ type Event = {
 type Props = {
   events: Event[];
   onDelete?: (id: number) => void;
+  onEdit?: (event: Event) => void;
 };
 
-function EventList({ events, onDelete }: Props) {
+function EventList({ events, onDelete, onEdit }: Props) {
   return (
     <div className="event-list">
       {events.length === 0 ? (
         <p>No events scheduled</p>
       ) : (
         [...events]
+          .filter((event) => new Date(event.endTime).getTime() >= Date.now())
           .sort(
             (a, b) =>
               new Date(a.startTime).getTime() -
@@ -28,7 +30,13 @@ function EventList({ events, onDelete }: Props) {
           .map((event) => (
             <div key={event.id} className="event-card">
               <div className="event-actions">
-                <button className="edit-btn" title="Edit"><i className="bi bi-pencil-square"></i></button>
+                <button
+                  className="edit-btn"
+                  title="Edit"
+                  onClick={() => onEdit?.(event)}
+                >
+                  <i className="bi bi-pencil-square"></i>
+                </button>
                 <button
                   className="delete-btn"
                   title="Delete"

@@ -15,6 +15,7 @@ function Dashboard() {
   const [endTime, setEndTime] = useState<string>("");
   const [events, setEvents] = useState<any[]>([]);
   const [isFullDay, setIsFullDay] = useState<boolean>(false);
+  const [editingEvent, setEditingEvent] = useState<any | null>(null);
 
   const handleCreateEvent = async (allDay: boolean) => {
     if (!token) {
@@ -52,9 +53,24 @@ function Dashboard() {
         payload.endTime = new Date(endTime).toISOString();
       }
 
-      await createEvent(token, payload);
+      if (editingEvent) {
+        await fetch(`/api/tasks/${editingEvent.id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(payload),
+        });
 
-      alert("Event created!");
+        alert("Event updated!");
+      } else {
+        await createEvent(token, payload);
+
+        alert("Event created!");
+      }
+
+      setEditingEvent(null);
 
       fetchEvents(token)
         .then(setEvents)
@@ -79,6 +95,16 @@ function Dashboard() {
       .then(setEvents)
       .catch((err) => console.error(err));
   }, [token]);
+
+  useEffect(() => {
+    if (!editingEvent) return;
+
+    setTitle(editingEvent.name || "");
+    setDescription(editingEvent.description || "");
+    setStartTime(editingEvent.startTime || "");
+    setEndTime(editingEvent.endTime || "");
+    setIsFullDay(editingEvent.isAllDay || false);
+  }, [editingEvent]);
 
   const handleDelete = async (id: number) => {
     if (!token) return;
@@ -209,7 +235,9 @@ function Dashboard() {
                 disabled={loading}
                 onClick={() => handleCreateEvent(isFullDay)}
               >
-                {loading ? "Creating..." : "Create"}
+                {loading
+                  ? (editingEvent ? "Saving..." : "Creating...")
+                  : (editingEvent ? "Save" : "Create")}
               </button>
 
             </div>
@@ -224,7 +252,11 @@ function Dashboard() {
           Upcoming Events
         </h2>
 
-        <EventList events={events} onDelete={handleDelete} />
+        <EventList
+          events={events}
+          onDelete={handleDelete}
+          onEdit={setEditingEvent}
+        />
       </section>
     </main>
   );
