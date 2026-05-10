@@ -50,7 +50,6 @@ function TimeModal({
     ? value.split("T")[0]
     : "";
 
-  // robust HH:MM extraction (prevents broken strings like "Tue, ..." leaking)
   const timeMatch = value?.match(/(\d{1,2}):(\d{2})/);
   const currentTime = timeMatch
     ? `${timeMatch[1].padStart(2, "0")}:${timeMatch[2]}`
