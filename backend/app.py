@@ -133,6 +133,50 @@ def delete_task(task_id):
         cursor.close()
         conn.close()
 
+# UPDATE TASK (EDIT EVENT) - PROTECTED
+@app.route("/api/tasks/<int:task_id>", methods=["PUT"])
+@token_required
+def update_task(task_id):
+    data = request.get_json()
+
+    name = data.get("name")
+    description = data.get("description", "")
+    startTime = data.get("startTime")
+    endTime = data.get("endTime")
+    isAllDay = data.get("isAllDay", False)
+
+    if not name or not startTime or not endTime:
+        return jsonify({"error": "Missing required fields"}), 400
+
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            UPDATE Tasks
+            SET name = %s,
+                description = %s,
+                startTime = %s,
+                endTime = %s,
+                isAllDay = %s
+            WHERE id = %s AND userId = %s
+        """, (name, description, startTime, endTime, isAllDay, task_id, request.user_id))
+
+        conn.commit()
+
+        if cursor.rowcount == 0:
+            cursor.close()
+            conn.close()
+            return jsonify({"error": "Task not found or not updated"}), 404
+
+        cursor.close()
+        conn.close()
+
+        return jsonify({"message": "Task updated successfully"}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 
 # REGISTER
 @app.route("/api/register", methods=["POST"])

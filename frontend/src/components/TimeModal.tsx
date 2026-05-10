@@ -46,9 +46,24 @@ function TimeModal({
     };
   }, []);
 
-  const currentDate = value?.split("T")[0] || "";
-  const currentTime =
-    value?.split("T")[1] || defaultTime;
+  const currentDate = value?.includes("T")
+    ? value.split("T")[0]
+    : "";
+
+  // robust HH:MM extraction (prevents broken strings like "Tue, ..." leaking)
+  const timeMatch = value?.match(/(\d{1,2}):(\d{2})/);
+  const currentTime = timeMatch
+    ? `${timeMatch[1].padStart(2, "0")}:${timeMatch[2]}`
+    : defaultTime;
+
+  useEffect(() => {
+    const match = currentTime.match(/(\d{2}):(\d{2})/);
+
+    if (match) {
+      setHour(match[1]);
+      setMinute(match[2]);
+    }
+  }, [currentTime]);
 
   return (
     <div className="modern-date-group">
