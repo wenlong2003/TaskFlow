@@ -14,6 +14,22 @@ type Props = {
   onEdit?: (event: Event) => void;
 };
 
+const formatDisplay = (value: string) => {
+  if (!value) return "";
+
+  const date = new Date(value.replace(" ", "T"));
+
+  if (isNaN(date.getTime())) return value;
+
+  return date.toLocaleString([], {
+    year: "numeric",
+    month: "short",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
 function EventList({ events, onDelete, onEdit }: Props) {
   return (
     <div className="event-list">
@@ -21,12 +37,16 @@ function EventList({ events, onDelete, onEdit }: Props) {
         <p>No events scheduled</p>
       ) : (
         [...events]
-          .filter((event) => new Date(event.endTime).getTime() >= Date.now())
-          .sort(
-            (a, b) =>
-              new Date(a.startTime).getTime() -
-              new Date(b.startTime).getTime()
-          )
+          .filter((event) => {
+            const end = new Date(event.endTime || "");
+            return !isNaN(end.getTime()) && end.getTime() >= Date.now();
+          })
+          .sort((a, b) => {
+            const aTime = new Date(a.startTime || "").getTime();
+            const bTime = new Date(b.startTime || "").getTime();
+
+            return aTime - bTime;
+          })
           .map((event) => (
             <div key={event.id} className="event-card">
               <div className="event-actions">
@@ -60,7 +80,7 @@ function EventList({ events, onDelete, onEdit }: Props) {
               <p>{event.description}</p>
 
               <small>
-                {event.startTime} - {event.endTime}
+                {formatDisplay(event.startTime)} - {formatDisplay(event.endTime)}
               </small>
             </div>
           ))

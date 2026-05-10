@@ -84,8 +84,8 @@ def insert_task():
         return jsonify({"error": "Missing required fields"}), 400
 
     name = data["name"]
-    start_dt = datetime.datetime.fromisoformat(data.get("startTime").replace("Z", ""))
-    end_dt = datetime.datetime.fromisoformat(data.get("endTime").replace("Z", ""))
+    startTime = data.get("startTime")
+    endTime = data.get("endTime")
     description = data.get("description", "")
     isAllDay = data.get("isAllDay", False)
     userId = request.user_id
@@ -98,14 +98,7 @@ def insert_task():
         VALUES (%s, %s, %s, %s, %s, %s)
     """
 
-    cursor.execute(sql, (
-        name,
-        description,
-        start_dt.strftime("%Y-%m-%d %H:%M:%S"),
-        end_dt.strftime("%Y-%m-%d %H:%M:%S"),
-        isAllDay,
-        userId
-    ))
+    cursor.execute(sql, (name, description, startTime, endTime, isAllDay, userId))
     conn.commit()
 
     cursor.close()
@@ -248,7 +241,7 @@ def login():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
+    
 
 # UPDATE USER (USERNAME / EMAIL)
 @app.route("/api/user", methods=["PUT"])
@@ -329,22 +322,15 @@ def change_password():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
-# DELETE USER ACCOUNT (PROTECTED)
+    
+    # DELETE USER (SAFE ADDITION)
 @app.route("/api/user", methods=["DELETE"])
 @token_required
-def delete_account():
+def delete_user():
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
 
-        # delete user's tasks first
-        cursor.execute(
-            "DELETE FROM Tasks WHERE userId = %s",
-            (request.user_id,)
-        )
-
-        # delete user account
         cursor.execute(
             "DELETE FROM Users WHERE id = %s",
             (request.user_id,)
@@ -352,65 +338,14 @@ def delete_account():
 
         conn.commit()
 
-        if cursor.rowcount == 0:
-            cursor.close()
-            conn.close()
-            return jsonify({"error": "User not found"}), 404
-
         cursor.close()
         conn.close()
 
-        return jsonify({"message": "Account deleted"}), 200
+        return jsonify({"message": "User deleted successfully"}), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-# UPDATE TASK (PROTECTED)
-@app.route("/api/tasks/<int:task_id>", methods=["PUT"])
-@token_required
-def update_task(task_id):
-    data = request.get_json()
 
-    if not data:
-        return jsonify({"error": "Missing data"}), 400
-
-    name = data.get("name")
-    description = data.get("description", "")
-    start_dt = datetime.datetime.fromisoformat(data.get("startTime").replace("Z", ""))
-    end_dt = datetime.datetime.fromisoformat(data.get("endTime").replace("Z", ""))
-    isAllDay = data.get("isAllDay", False)
-
-    conn = get_db_connection()
-    cursor = conn.cursor()
-
-    cursor.execute("""
-        UPDATE Tasks
-        SET name = %s,
-            description = %s,
-            startTime = %s,
-            endTime = %s,
-            isAllDay = %s
-        WHERE id = %s AND userId = %s
-    """, (
-        name,
-        description,
-        start_dt.strftime("%Y-%m-%d %H:%M:%S"),
-        end_dt.strftime("%Y-%m-%d %H:%M:%S"),
-        isAllDay,
-        task_id,
-        request.user_id
-    ))
-
-    conn.commit()
-
-    if cursor.rowcount == 0:
-        cursor.close()
-        conn.close()
-        return jsonify({"error": "Task not found"}), 404
-
-    cursor.close()
-    conn.close()
-
-    return jsonify({"message": "Task updated"}), 200
 # RUN APP
 if __name__ == "__main__":
     app.run(debug=True, port=5000)

@@ -1,7 +1,6 @@
 import "temporal-polyfill/global"
 import { useCalendarApp, ScheduleXCalendar } from '@schedule-x/react'
 import { useEffect, useState } from 'react'
-import type { CalendarEventExternal } from '@schedule-x/calendar'
 import {
   createViewDay,
   createViewMonthAgenda,
@@ -18,7 +17,6 @@ function CalendarView() {
   const [eventsService] = useState(() => createEventsServicePlugin())
   const { token } = useAuth()
   const calendar = useCalendarApp({
-    locale: 'en-GB',
     views: [
       createViewDay(),
       createViewWeek(),
@@ -46,26 +44,38 @@ function CalendarView() {
           return
         }
 
-        const formattedEvents: CalendarEventExternal[] = data.map((task: any) => {
-          const startDate = new Date(task.startTime)
-          const endDate = new Date(task.endTime)
+        // Schedule-X-compatible version: add events directly to eventsService
+        data.forEach((task: any) => {
+          const isAllDay = task.isAllDay
 
-          const start = Temporal.Instant.fromEpochMilliseconds(startDate.getTime())
-            .toZonedDateTimeISO(Temporal.Now.timeZoneId())
+          if (isAllDay) {
+            const startDate = task.startTime?.slice(0, 10)
+            const endDate = task.endTime?.slice(0, 10)
 
-          const end = Temporal.Instant.fromEpochMilliseconds(endDate.getTime())
-            .toZonedDateTimeISO(Temporal.Now.timeZoneId())
+            eventsService.add({
+              id: String(task.id),
+              title: task.name,
+              description: task.description,
+              start: Temporal.PlainDate.from(startDate),
+              end: Temporal.PlainDate.from(endDate),
+            })
+          } else {
+            // Safely parse backend datetime (handles RFC, ISO, or string formats)
+            const startInstant = Temporal.Instant.from(new Date(task.startTime).toISOString())
+            const endInstant = Temporal.Instant.from(new Date(task.endTime).toISOString())
 
-          return {
-            id: String(task.id),
-            title: task.name,
-            description: task.description,
-            start,
-            end,
+            const startZoned = startInstant.toZonedDateTimeISO("America/New_York")
+            const endZoned = endInstant.toZonedDateTimeISO("America/New_York")
+
+            eventsService.add({
+              id: String(task.id),
+              title: task.name,
+              description: task.description,
+              start: startZoned,
+              end: endZoned,
+            })
           }
         })
-
-        eventsService.set(formattedEvents)
       })
       .catch(console.error)
   }, [calendar, eventsService, token])

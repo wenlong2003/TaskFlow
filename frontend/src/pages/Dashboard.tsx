@@ -5,6 +5,32 @@ import TimeModal from "../components/TimeModal";
 import EventList from "../components/EventList";
 import { fetchEvents, createEvent } from "../utils/eventApi";
 
+const formatDateTime = (value: string) => {
+  if (!value) return "";
+
+  try {
+    const normalized = value.includes("T")
+      ? value
+      : value.replace(" ", "T");
+
+    const date = new Date(normalized);
+
+    if (isNaN(date.getTime())) {
+      console.error("Invalid date passed to formatDateTime:", value);
+      return "";
+    }
+
+    return date
+      .toISOString()
+      .replace("T", " ")
+      .replace("Z", "")
+      .slice(0, 19);
+  } catch (err) {
+    console.error("formatDateTime error:", err, value);
+    return "";
+  }
+};
+
 function Dashboard() {
   const [loading, setLoading] = useState<boolean>(false);
   const { token } = useAuth();
@@ -40,8 +66,8 @@ function Dashboard() {
       if (allDay) {
         const dateOnly = startTime.split("T")[0];
 
-        payload.startTime = `${dateOnly} 00:00:00`;
-        payload.endTime = `${dateOnly} 23:59:59`;
+        payload.startTime = formatDateTime(`${dateOnly}T00:00:00`);
+        payload.endTime = formatDateTime(`${dateOnly}T23:59:59`);
       } else {
         if (!startTime || !endTime) {
           alert("Please fill all required fields.");
@@ -49,8 +75,8 @@ function Dashboard() {
           return;
         }
 
-        payload.startTime = new Date(startTime).toISOString();
-        payload.endTime = new Date(endTime).toISOString();
+        payload.startTime = formatDateTime(startTime);
+        payload.endTime = formatDateTime(endTime);
       }
 
       if (editingEvent) {
@@ -103,7 +129,7 @@ function Dashboard() {
     setDescription(editingEvent.description || "");
     setStartTime(editingEvent.startTime || "");
     setEndTime(editingEvent.endTime || "");
-    setIsFullDay(editingEvent.isAllDay || false);
+    setIsFullDay(editingEvent.isAllDay ?? false);
   }, [editingEvent]);
 
   const handleDelete = async (id: number) => {

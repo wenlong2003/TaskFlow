@@ -1,5 +1,10 @@
 export const formatDateTime = (value: string): string => {
-  return value.replace("T", " ") + ":00";
+  if (!value) return "";
+
+  return value
+    .replace("T", " ")
+    .replace("Z", "")
+    .slice(0, 19);
 };
 
 export const fetchEvents = async (token: string) => {
